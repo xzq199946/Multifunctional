@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/taylor2"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/txtShow"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="2dp"
+        android:text="" />
+
+    <EditText
+        android:id="@+id/txtCount"
+        android:layout_width="299dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtShow"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="33dp"
+        android:layout_marginTop="33dp"
+        android:ems="10"
+        android:hint="请输入账号:"
+        android:inputType="textPersonName"
+        android:text="@string/txt_count" />
+
+    <EditText
+        android:id="@+id/txtPassword"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtCount"
+        android:layout_alignStart="@+id/txtCount"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="请输入密码:"
+        android:inputType="textPassword"
+        android:text="@string/txt_password" />
+
+    <Button
+        android:id="@+id/btnOk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtPassword"
+        android:layout_alignStart="@+id/txtPassword"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="73dp"
+        android:text="@string/btn_ok" />
+
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtPassword"
+        android:layout_alignEnd="@+id/txtPassword"
+        android:layout_marginTop="73dp"
+        android:layout_marginEnd="0dp"
+        android:text="@string/btn_cancel" />
+
+    <Button
+        android:id="@+id/btnInfo"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="0dp"
+        android:layout_toEndOf="@+id/txtShow"
+        android:text="@string/btn_info" />
+
+    <CheckBox
+        android:id="@+id/cb_autologin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtPassword"
+        android:layout_alignStart="@+id/txtPassword"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="25dp"
+        android:text="@string/cb_autologin" />
+
+    <CheckBox
+        android:id="@+id/cb_remeberpassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtPassword"
+        android:layout_alignStart="@+id/txtPassword"
+        android:layout_marginStart="110dp"
+        android:layout_marginTop="25dp"
+        android:text="@string/cb_rbpassword" />
+
+    <CheckBox
+        android:id="@+id/cb_forgetpassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtPassword"
+        android:layout_alignEnd="@+id/btnCancel"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="0dp"
+        android:text="@string/cb_forpassword" />
+
+    <Button
+        android:id="@+id/btnRegiste"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtPassword"
+        android:layout_marginStart="21dp"
+        android:layout_marginTop="73dp"
+        android:layout_toEndOf="@+id/btnOk"
+        android:text="@string/btn_registe" />
+
+</RelativeLayout>

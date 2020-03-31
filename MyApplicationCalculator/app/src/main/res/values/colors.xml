@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#7BE0D2</color>
+    <color name="colorAccent">#030303</color>
+    <color name="colorBackGround">#F0FFFF</color>"
+    <color name="colorFont">#ffffff</color>
+    <color name="air_quality_color">#FF6633</color>
+</resources>
