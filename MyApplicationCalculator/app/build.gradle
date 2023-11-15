@@ -1,14 +1,23 @@
 apply plugin: 'com.android.application'
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.example.myapplicationcalculator"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    signingConfigs {
+        debug {
+            storeFile file('C:\\Users\\chengfeng\\AndroidStudioProjects\\Multifunctional\\MyApplicationCalculator\\key0.jks')
+            storePassword 'xzq199946'
+            keyAlias = 'key0'
+            keyPassword 'xzq199946'
+        }
     }
     buildTypes {
         release {
