@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="hour"
+            type="com.example.myapplicationcalculator.HourBean" />
+    </data>
+
+    <LinearLayout
+        android:id="@+id/hour_item"
+        android:layout_width="75dp"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvHourOneTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@{hour.hourTime}"
+                android:textColor="@color/colorBackGround"
+                android:textSize="20sp"
+                android:textStyle="normal|bold" />
+
+
+            <ImageView
+                android:id="@+id/ivHourOneImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/duoyun" />
+
+
+            <TextView
+                android:id="@+id/tvHourOneTemperture"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@{hour.hourTemp}"
+                android:textColor="@color/colorBackGround"
+                android:textSize="20sp"
+                android:textStyle="normal|bold" />
+
+        </LinearLayout>
+    </LinearLayout>
+</layout>

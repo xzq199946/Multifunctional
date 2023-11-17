@@ -59,7 +59,6 @@ import java.util.List;
 
 public class WeatherActivity extends AppCompatActivity {
     Thread thread;
-    Runnable networkTask;
     private static  JsonObject returnData = null;
     private JsonObject  jsonObject_weatherNowApi,jsnObweatherNowApi_today,jsnObweatherNowApi_today_airquality;
     private JSONObject jsonObject_weather;
@@ -70,16 +69,12 @@ public class WeatherActivity extends AppCompatActivity {
      *今天的天气信息的key
      */
     String [] todaydate = {"date", "address","temp","temparea","weathercondition","airqualitynum","airqualitygrade"};
-    String [] hourTime ={"onehourtime","twohourtime","threehourtime","fourhourtime",
-            "fivehourtime","sixhourtime","sevenhourtime","eighthourtime"};
-    String [] hourTemp ={"onehourtemp","twohourtemp","threehourtemp","fourhourtemp",
-            "fivehourtemp","sixhourtemp","sevenhourtemp","eighthourtemp"};
-    String [] hourWeatherCondition ={"onehourcondition","twohourcondition","threehourcondition","fourhourcondition",
-            "fivehourcondition","sixhourcondition","sevenhourcondition","eighthourcondition"};
 
     private DayAdapter dayAdapter;
+    private HourAdapter hourAdapter;
 
     DaysViewModel daysViewModel;
+    HoursViewModel hoursViewModel;
 
     @SuppressLint("HandlerLeak")
     private final Handler mHandler = new Handler(){
@@ -167,6 +162,7 @@ public class WeatherActivity extends AppCompatActivity {
 
             if(val.equals("hour")){
                 String datetoday = "20001010";//默认时间
+                List<HourBean> hourBeans = new ArrayList<>();
                 try{
                     JSONObject result = jsonObject_weather.getJSONObject("Result");
                     datetoday = result.get("Todate").toString();
@@ -179,13 +175,18 @@ public class WeatherActivity extends AppCompatActivity {
                         // ，显示视图一共有八个，等于8的时候说明已经获得八个小时，所以跳出循环
                         String skey = iterable.next();
                         System.out.println("Weatherhhh.java  "+skey);
+
                         JSONObject jsonObject = jsondate.getJSONObject(skey);
-                        hashMapView.put(hourTime[viewNum], skey.substring(5)+":00");//小时数据添加到hashMapView里
-                        String temp = jsonObject.get("Temp").toString();//添加温度
-                        System.out.println(temp);
-                        hashMapView.put(hourTemp[viewNum], temp);
-                        String weatherhour = jsonObject.get("Weather").toString();
-                        hashMapView.put(hourWeatherCondition[viewNum], weatherhour);//添加天气状况,比如:晴
+
+                        HourBean hourBean = new HourBean();
+                        String hourTime = skey.substring(5)+":00";
+                        String hourTemp = jsonObject.get("Temp").toString();
+                        int hourResourceInt = displayiv(jsonObject.get("Weather").toString());
+
+                        hourBean.setHourTime(hourTime);
+                        hourBean.setHourTemp(hourTemp);
+                        hourBean.setConditionImageResource(hourResourceInt);
+                        hourBeans.add(hourBean);
                         viewNum++;//迭代一个小时就加一
                     }
                     if(viewNum<8){//第一天获得小时数据不到八个，需要获得第二天的
@@ -197,12 +198,17 @@ public class WeatherActivity extends AppCompatActivity {
                             String skey = iterable2.next();
                             System.out.println("Weatherhhh2.java  "+skey);
                             JSONObject jsonObject = weather24thTomorrow.getJSONObject(skey);//小时
-                            hashMapView.put(hourTime[viewNum], skey.substring(5)+":00");
-                            String temp = jsonObject.get("Temp").toString();
-                            System.out.println(temp);
-                            hashMapView.put(hourTemp[viewNum], temp);
-                            String weatherhour = jsonObject.get("Weather").toString();
-                            hashMapView.put(hourWeatherCondition[viewNum], weatherhour);
+
+                            HourBean hourBean = new HourBean();
+                            String hourTime = skey.substring(5)+":00";
+                            String hourTemp = jsonObject.get("Temp").toString();
+                            int hourResourceInt = displayiv(jsonObject.get("Weather").toString());
+
+                            hourBean.setHourTime(hourTime);
+                            hourBean.setHourTemp(hourTemp);
+                            hourBean.setConditionImageResource(hourResourceInt);
+                            hourBeans.add(hourBean);
+
                             viewNum++;
                         }
                     }
@@ -220,38 +226,8 @@ public class WeatherActivity extends AppCompatActivity {
                     System.out.println(e);
                 }
 
-                tvHourOneTime.setText(hashMapView.get(hourTime[0]).toString());
-                tvHourOneTemperture.setText(hashMapView.get(hourTemp[0]).toString());
-                //根据获得的天气状况显示指定的天气图标
-                displayiv(hashMapView.get(hourWeatherCondition[0]).toString(), ivHourOneImage);
-
-                tvHourTwoTime.setText(hashMapView.get(hourTime[1]).toString());
-                tvHourTwoTemperture.setText(hashMapView.get(hourTemp[1]).toString());
-                displayiv(hashMapView.get(hourWeatherCondition[1]).toString(), ivHourTwoImage);
-
-                tvHourThreeTime.setText(hashMapView.get(hourTime[2]).toString());
-                tvHourThreeTemperture.setText(hashMapView.get(hourTemp[2]).toString());
-                displayiv(hashMapView.get(hourWeatherCondition[2]).toString(), ivHourThreeImage);
-
-                tvHourFourTime.setText(hashMapView.get(hourTime[3]).toString());
-                tvHourFourTemperture.setText(hashMapView.get(hourTemp[3]).toString());
-                displayiv(hashMapView.get(hourWeatherCondition[3]).toString(), ivHourFourImage);
-
-                tvHourFiveTime.setText(hashMapView.get(hourTime[4]).toString());
-                tvHourFiveTemperture.setText(hashMapView.get(hourTemp[4]).toString());
-                displayiv(hashMapView.get(hourWeatherCondition[4]).toString(), ivHourFiveImage);
-
-                tvHourSixTime.setText(hashMapView.get(hourTime[5]).toString());
-                tvHourSixTemperture.setText(hashMapView.get(hourTemp[5]).toString());
-                displayiv(hashMapView.get(hourWeatherCondition[5]).toString(), ivHourSixImage);
-
-                tvHourSevenTime.setText(hashMapView.get(hourTime[6]).toString());
-                tvHourSevenTemperture.setText(hashMapView.get(hourTemp[6]).toString());
-                displayiv(hashMapView.get(hourWeatherCondition[6]).toString(), ivHourSevenImage);
-
-                tvHourEightTime.setText(hashMapView.get(hourTime[7]).toString());
-                tvHourEightTemperture.setText(hashMapView.get(hourTemp[7]).toString());
-                displayiv(hashMapView.get(hourWeatherCondition[7]).toString(), ivHourEightImage);
+                System.out.println("当前屏幕显示时间数为 : "+hourBeans.size());
+                hoursViewModel.setDays(hourBeans);
             }
         }
     };
@@ -260,17 +236,9 @@ public class WeatherActivity extends AppCompatActivity {
     ImageButton nowLocation, reGet;
     //Day天气图标
     ImageView ivDayToday_ImageView;
-    //小时天气图标,逐三小时报
-    ImageView ivHourOneImage, ivHourTwoImage, ivHourThreeImage, ivHourFourImage, ivHourFiveImage, ivHourSixImage,
-            ivHourSevenImage, ivHourEightImage;
     //当天
     TextView tvDayToday_Date, tvDayToday_NowTemperture, tvDayToday_ScopeTemperture,
             tvDayToday_WeatherChange, tvDayToday_AirQualityNum, tvDayToday_AirQualityGrade;
-
-    //小时的信息
-    TextView tvHourOneTime, tvHourOneTemperture, tvHourTwoTime, tvHourTwoTemperture, tvHourThreeTime, tvHourThreeTemperture;
-    TextView tvHourFourTime, tvHourFourTemperture, tvHourFiveTime, tvHourFiveTemperture, tvHourSixTime, tvHourSixTemperture;
-    TextView tvHourSevenTime, tvHourSevenTemperture, tvHourEightTime, tvHourEightTemperture;
 
     private ActivityWeatherBinding activityWeatherBinding;
 
@@ -290,20 +258,19 @@ public class WeatherActivity extends AppCompatActivity {
                 activityWeatherBinding.dayRecycle.setAdapter(dayAdapter);
             }
         });
+        hoursViewModel = new ViewModelProvider(this).get(HoursViewModel.class);
+        hoursViewModel.getDaysLiveData().observe(WeatherActivity.this, hourBeans -> {
+            hourAdapter = new HourAdapter(hourBeans);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(WeatherActivity.this, LinearLayoutManager.HORIZONTAL, false);
+            activityWeatherBinding.hourRecycle.setLayoutManager(linearLayoutManager);
+            activityWeatherBinding.hourRecycle.setAdapter(hourAdapter);
+        });
+
         intent =getIntent();
         String citymsg= intent.getStringExtra("data");//获得从搜索城市界面中输入的城市
         System.out.println(" citymsg"+citymsg);
         float dpDimension = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16,this.getResources().getDisplayMetrics());
         System.out.println(dpDimension+"hh");
-
-
-//        float pxValue = getResources().getDimension(R.dimen.sp_15);//获取对应资源文件下的sp值
-//        int spValue = DisplayUtil. ;px2sp(this, pxValue);//将px值转换成sp值
-//        tvHourOneTime.setTextSize(spValue);//设置文字大小
-//
-//        /*获取dp值*/
-//        float pxValue2 = getResources().getDimension(R.dimen.dp_360);//获取对应资源文件下的dp值
-//        int dpValue = ConvertUtils.px2dp(this, pxValue2);//将px值转换成dp值
 
         if(citymsg ==null){//判断是否从MainMeunActivity跳转到此页面,如果为null，则是
             tvcity = updateWithNewLocation();//通过定位和数据获得城市
@@ -368,19 +335,45 @@ public class WeatherActivity extends AppCompatActivity {
             mHandler.sendMessage(msg);
         }
 
-        fabAddCity.setOnClickListener(new View.OnClickListener() {//跳转到SearchCityActivity
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setClass(WeatherActivity.this,SearchCityActivity.class);
-                finish();
-                startActivity(intent);
-            }
+        //跳转到SearchCityActivity
+        fabAddCity.setOnClickListener(view -> {
+            Intent intent = new Intent();
+            intent.setClass(WeatherActivity.this,SearchCityActivity.class);
+            finish();
+            startActivity(intent);
         });
-        reGet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {//实时更新数据
 
+        reGet.setOnClickListener(view -> {//实时更新数据
+
+            Handler handler=new Handler();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        updata("rtweather",tvcity);
+                        updata("weather.future",tvcity);
+                        updata("weather.today",tvcity);
+                        updata("weather.pm25",tvcity);
+
+                    }catch (Exception e){
+                        System.out.println("cw"+e);
+                    }
+
+                }
+            });
+
+            System.out.println("reGetButton");
+        });
+
+        nowLocation.setOnClickListener(view -> {
+            tvcity = updateWithNewLocation();
+            if(tvcity == null){//判断定位是否打开
+                Toast.makeText(WeatherActivity.this,"请打开GPS",Toast.LENGTH_LONG).show();//和打开Intent的顺序相反
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }else {
+                System.out.println("城市更新成功"+tvcity);
+                city.setText(tvcity);
                 Handler handler=new Handler();
                 handler.post(new Runnable() {
                     @Override
@@ -394,40 +387,8 @@ public class WeatherActivity extends AppCompatActivity {
                         }catch (Exception e){
                             System.out.println("cw"+e);
                         }
-
                     }
                 });
-
-                System.out.println("reGetButton");
-            }
-        });
-        nowLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                tvcity = updateWithNewLocation();
-                if(tvcity == null){//判断定位是否打开
-                    Toast.makeText(WeatherActivity.this,"请打开GPS",Toast.LENGTH_LONG).show();//和打开Intent的顺序相反
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(intent);
-                }else {
-                    System.out.println("城市更新成功"+tvcity);
-                    city.setText(tvcity);
-                    Handler handler=new Handler();
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try{
-                                updata("rtweather",tvcity);
-                                updata("weather.future",tvcity);
-                                updata("weather.today",tvcity);
-                                updata("weather.pm25",tvcity);
-
-                            }catch (Exception e){
-                                System.out.println("cw"+e);
-                            }
-                        }
-                    });
-                }
             }
         });
 
@@ -437,15 +398,6 @@ public class WeatherActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-         thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("thread ");
-            }
-        });
-        thread.start();
-
     }
     public String getTomorray(String stringtoday){//获得明天的日期
         Calendar calendar = new GregorianCalendar();//获得一个日期表
@@ -474,38 +426,6 @@ public class WeatherActivity extends AppCompatActivity {
         tvDayToday_WeatherChange = findViewById(R.id.tvDayToday_WeatherChange);
         tvDayToday_AirQualityNum = findViewById(R.id.tvDayToday_AirQualityNum);
         tvDayToday_AirQualityGrade = findViewById(R.id.tvDayToday_AirQualityGrade);
-
-        tvHourOneTime = findViewById(R.id.tvHourOneTime);
-        tvHourOneTemperture = findViewById(R.id.tvHourOneTemperture);
-        ivHourOneImage = findViewById(R.id.ivHourOneImage);
-
-        tvHourTwoTime = findViewById(R.id.tvHourTwoTime);
-        tvHourTwoTemperture = findViewById(R.id.tvHourTwoTemperture);
-        ivHourTwoImage = findViewById(R.id.ivHourTwoImage);
-
-        tvHourThreeTime = findViewById(R.id.tvHourThreeTime);
-        tvHourThreeTemperture = findViewById(R.id.tvHourThreeTemperture);
-        ivHourThreeImage = findViewById(R.id.ivHourThreeImage);
-
-        tvHourFourTime = findViewById(R.id.tvHourFourTime);
-        tvHourFourTemperture = findViewById(R.id.tvHourFourTemperture);
-        ivHourFourImage = findViewById(R.id.ivHourFourImage);
-
-        tvHourFiveTime = findViewById(R.id.tvHourFiveTime);
-        tvHourFiveTemperture = findViewById(R.id.tvHourFiveTemperture);
-        ivHourFiveImage = findViewById(R.id.ivHourFiveImage);
-
-        tvHourSixTime = findViewById(R.id.tvHourSixTime);
-        tvHourSixTemperture = findViewById(R.id.tvHourSixTemperture);
-        ivHourSixImage = findViewById(R.id.ivHourSixImage);
-
-        tvHourSevenTime = findViewById(R.id.tvHourSevenTime);
-        tvHourSevenTemperture = findViewById(R.id.tvHourSevenTemperture);
-        ivHourSevenImage = findViewById(R.id.ivHourSevenImage);
-
-        tvHourEightTime = findViewById(R.id.tvHourEightTime);
-        tvHourEightTemperture = findViewById(R.id.tvHourEightTemperture);
-        ivHourEightImage = findViewById(R.id.ivHourEightImage);
     }
 
     public int displayiv(String weathercondition){//显示天气图标
