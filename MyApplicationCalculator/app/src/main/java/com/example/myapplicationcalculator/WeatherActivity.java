@@ -3,9 +3,13 @@ package com.example.myapplicationcalculator;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.database.Observable;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -23,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.myapplicationcalculator.databinding.ActivityWeatherBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -53,6 +58,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import okhttp3.HttpUrl;
@@ -79,21 +85,11 @@ public class WeatherActivity extends AppCompatActivity {
             "fivehourtemp","sixhourtemp","sevenhourtemp","eighthourtemp"};
     String [] hourWeatherCondition ={"onehourcondition","twohourcondition","threehourcondition","fourhourcondition",
             "fivehourcondition","sixhourcondition","sevenhourcondition","eighthourcondition"};
-    /*
-     *之后七天的信息的key
-     */
 
-    String [] dayDate = {"onedaydate","twodaydate","threedaydate","fourdaydate",
-            "fivedaydate","sixdaydate","sevendaydate"};
-    String [] dayWeek = {"onedayweek","twodayweek","threedayweek","fourdayweek",
-            "fivedayweek","sixdayweek","sevendayweek"};
-    String [] dayCondition = {"onedaycondition","twodaycondition","threedaycondition","fourdaycondition",
-            "fivedaycondition","sixdaycondition","sevendaycondition"};
-    String [] dayMaxTemp = {"onedaymaxtemp","twodaymaxtemp","threedaymaxtemp","fourdaymaxtemp",
-            "fivedaymaxtemp","sixdaymaxtemp","sevendaymaxtemp"};
-    String [] dayMinTemp = {"onedaymintemp","twodaymintemp","threedaymintemp","fourdaymintemp",
-            "fivedaymintemp","sixdaymintemp","sevendaymintemp"};
-    private Handler mHandler = new Handler(){
+    private DayAdapter dayAdapter;
+    @SuppressLint("HandlerLeak")
+    private final Handler mHandler = new Handler(){
+        @SuppressLint("HandlerLeak")
         public void handleMessage(Message msg){
             Bundle data = msg.getData();
             String val = data.getString("value");
@@ -110,69 +106,39 @@ public class WeatherActivity extends AppCompatActivity {
                 JsonArray jsonArray=null;
                 jsonArray = jsonObject_weatherNowApi.getAsJsonArray("result");
                 int dayindex = 0;//天气的index,从零开始
+                List<LateDateWeatherBean> lateDaysList = new ArrayList<>();
+
                 for(JsonElement jsonElement : jsonArray){
                     if(dayindex>=7){//大于七天返回
                         break;
                     }
                     //获得数组的单个Json对象
+                    LateDateWeatherBean lateDateWeatherBean = new LateDateWeatherBean();
                     JsonObject jsonObject1 = jsonElement.getAsJsonObject();
+                    String dayTime = jsonObject1.get("days").getAsString().substring(5);
+                    String dayWeek = jsonObject1.get("week").getAsString();
+                    String tempLow = addSpace(jsonObject1.get("temp_low").getAsString());
+                    String tempHeight = addSpace(jsonObject1.get("temp_high").getAsString());
+                    int resInt = displayiv(jsonObject1.get("weather").getAsString());
+
+                    lateDateWeatherBean.setDayTime(dayTime);
+                    lateDateWeatherBean.setDayWeek(dayWeek);
+                    lateDateWeatherBean.setTempHeight(tempHeight);
+                    lateDateWeatherBean.setTempLow(tempLow);
+                    lateDateWeatherBean.setConditionImageResource(resInt);
+                    lateDaysList.add(lateDateWeatherBean);
+
                     System.out.println("nowapi"+jsonObject1.get("days").getAsString().substring(5));
-                    hashMapView.put(dayDate[dayindex],jsonObject1.get("days").getAsString().substring(5));
-                    hashMapView.put(dayWeek[dayindex],jsonObject1.get("week").getAsString());
-                    String temp_low = addSpace(jsonObject1.get("temp_low").getAsString());
-                    hashMapView.put(dayMinTemp[dayindex], temp_low);
-                    String temp_high = addSpace(jsonObject1.get("temp_high").getAsString());
-                    hashMapView.put(dayMaxTemp[dayindex],temp_high);
-                    hashMapView.put(dayCondition[dayindex],jsonObject1.get("weather").getAsString());
                     dayindex++;
                 }
 
                 if(jsonObject_weatherNowApi != null){
-                    tvDayAfterOneDay.setText(hashMapView.get(dayDate[0]).toString());
-                    tvDayAfterOneDay_Week.setText(hashMapView.get(dayWeek[0]).toString());
-                    tvDayAfterOneDay_MinTemperture.setText(hashMapView.get(dayMinTemp[0]).toString());
-                    tvDayAfterOneDay_MaxTemperture.setText(hashMapView.get(dayMaxTemp[0]).toString());
-                    displayiv(hashMapView.get(dayCondition[0]).toString(), ivDayAfterOneDay_ImageView);
-
-                    tvDayAfterTwoDay.setText(hashMapView.get(dayDate[1]).toString());
-                    tvDayAfterTwoDay_Week.setText(hashMapView.get(dayWeek[1]).toString());
-                    tvDayAfterTwoDay_MinTemperture.setText(hashMapView.get(dayMinTemp[1]).toString());
-                    tvDayAfterTwoDay_MaxTemperture.setText(hashMapView.get(dayMaxTemp[1]).toString());
-                    displayiv(hashMapView.get(dayCondition[1]).toString(), ivDayAfterTwoDay_ImageView);
-
-                    tvDayAfterThreeDay.setText(hashMapView.get(dayDate[2]).toString());
-                    tvDayAfterThreeDay_Week.setText(hashMapView.get(dayWeek[2]).toString());
-                    tvDayAfterThreeDay_MinTemperture.setText(hashMapView.get(dayMinTemp[2]).toString());
-                    tvDayAfterThreeDay_MaxTemperture.setText(hashMapView.get(dayMaxTemp[2]).toString());
-                    displayiv(hashMapView.get(dayCondition[2]).toString(), ivDayAfterThreeDay_ImageView);
-
-                    tvDayAfterFourDay.setText(hashMapView.get(dayDate[3]).toString());
-                    tvDayAfterFourDay_Week.setText(hashMapView.get(dayWeek[3]).toString());
-                    tvDayAfterFourDay_MinTemperture.setText(hashMapView.get(dayMinTemp[3]).toString());
-                    tvDayAfterFourDay_MaxTemperture.setText(hashMapView.get(dayMaxTemp[3]).toString());
-                    displayiv(hashMapView.get(dayCondition[3]).toString(), ivDayAfterFourDay_ImageView);
-
-                    tvDayAfterFiveDay.setText(hashMapView.get(dayDate[4]).toString());
-                    tvDayAfterFiveDay_Week.setText(hashMapView.get(dayWeek[4]).toString());
-                    tvDayAfterFiveDay_MinTemperture.setText(hashMapView.get(dayMinTemp[4]).toString());
-                    tvDayAfterFiveDay_MaxTemperture.setText(hashMapView.get(dayMaxTemp[4]).toString());
-                    displayiv(hashMapView.get(dayCondition[4]).toString(), ivDayAfterFiveDay_ImageView);
-
-                    tvDayAfterSixDay.setText(hashMapView.get(dayDate[5]).toString());
-                    tvDayAfterSixDay_Week.setText(hashMapView.get(dayWeek[5]).toString());
-                    tvDayAfterSixDay_MinTemperture.setText(hashMapView.get(dayMinTemp[5]).toString());
-                    tvDayAfterSixDay_MaxTemperture.setText(hashMapView.get(dayMaxTemp[5]).toString());
-                    displayiv(hashMapView.get(dayCondition[5]).toString(), ivDayAfterSixDay_ImageView);
+                    if (lateDaysList.size() > 0) {
+                        dayAdapter = new DayAdapter(lateDaysList);
+                        activityWeatherBinding.dayRecycle.setLayoutManager(new LinearLayoutManager(WeatherActivity.this));
+                        activityWeatherBinding.dayRecycle.setAdapter(dayAdapter);
+                    }
                 }
-
-                /*
-                 晚上零点时获取会只有六天的信息，少了一天
-                 */
-                tvDayAfterSevenDay.setText(hashMapView.get(dayDate[6]).toString());
-                tvDayAfterSevenDay_Week.setText(hashMapView.get(dayWeek[6]).toString());
-                tvDayAfterSevenDay_MinTemperture.setText(hashMapView.get(dayMinTemp[6]).toString());
-                tvDayAfterSevenDay_MaxTemperture.setText(hashMapView.get(dayMaxTemp[6]).toString());
-                displayiv(hashMapView.get(dayCondition[6]).toString(), ivDayAfterSevenDay_ImageView);
             }
             if(val.equals("today"))
             {
@@ -210,10 +176,6 @@ public class WeatherActivity extends AppCompatActivity {
                 tvDayToday_AirQualityGrade.setText(hashMapView.get(todaydate[6]).toString());
             }
 
-//            int [] image= {R.drawable.qing, R.drawable.duoyun,R.drawable.ying, R.drawable.xiaoyu,
-//                    R.drawable.zhongyu,R.drawable.dayu, R.drawable.baoyu, R.drawable.dabaoyu, R.drawable.tedabaoyu,
-//                    R.drawable.leizhenyu,R.drawable.qialeyu,R.drawable.xiaoyue,R.drawable.zhongyue,
-//                    R.drawable.dayue,R.drawable.dabaoyue,R.drawable.longjuanfeng};
             if(val.equals("hour")){
                 String datetoday = "20001010";//默认时间
                 try{
@@ -308,41 +270,27 @@ public class WeatherActivity extends AppCompatActivity {
     EditText city;
     ImageButton nowLocation, reGet;
     //Day天气图标
-    ImageView ivDayToday_ImageView, ivDayAfterOneDay_ImageView, ivDayAfterTwoDay_ImageView, ivDayAfterThreeDay_ImageView, ivDayAfterFourDay_ImageView,
-            ivDayAfterFiveDay_ImageView, ivDayAfterSixDay_ImageView, ivDayAfterSevenDay_ImageView;
+    ImageView ivDayToday_ImageView;
     //小时天气图标,逐三小时报
     ImageView ivHourOneImage, ivHourTwoImage, ivHourThreeImage, ivHourFourImage, ivHourFiveImage, ivHourSixImage,
             ivHourSevenImage, ivHourEightImage;
     //当天
     TextView tvDayToday_Date, tvDayToday_NowTemperture, tvDayToday_ScopeTemperture,
             tvDayToday_WeatherChange, tvDayToday_AirQualityNum, tvDayToday_AirQualityGrade;
-    TextView tvDayAfterOneDay, tvDayAfterOneDay_Week, tvDayAfterOneDay_MaxTemperture, tvDayAfterOneDay_MinTemperture;
-    //之后第二天
-    TextView tvDayAfterTwoDay, tvDayAfterTwoDay_Week, tvDayAfterTwoDay_MaxTemperture, tvDayAfterTwoDay_MinTemperture;
-    //之后第三天
-    TextView tvDayAfterThreeDay, tvDayAfterThreeDay_Week, tvDayAfterThreeDay_MaxTemperture,
-            tvDayAfterThreeDay_MinTemperture;
-    //之后第四天
-    TextView tvDayAfterFourDay, tvDayAfterFourDay_Week, tvDayAfterFourDay_MaxTemperture,
-            tvDayAfterFourDay_MinTemperture;
-    //之后第五天
-    TextView tvDayAfterFiveDay, tvDayAfterFiveDay_Week, tvDayAfterFiveDay_MaxTemperture,
-            tvDayAfterFiveDay_MinTemperture;
-    //之后第六天
-    TextView tvDayAfterSixDay, tvDayAfterSixDay_Week, tvDayAfterSixDay_MaxTemperture, tvDayAfterSixDay_MinTemperture;
-    //之后第七天
-    TextView tvDayAfterSevenDay, tvDayAfterSevenDay_Week, tvDayAfterSevenDay_MaxTemperture,
-            tvDayAfterSevenDay_MinTemperture;
+
     //小时的信息
     TextView tvHourOneTime, tvHourOneTemperture, tvHourTwoTime, tvHourTwoTemperture, tvHourThreeTime, tvHourThreeTemperture;
     TextView tvHourFourTime, tvHourFourTemperture, tvHourFiveTime, tvHourFiveTemperture, tvHourSixTime, tvHourSixTemperture;
     TextView tvHourSevenTime, tvHourSevenTemperture, tvHourEightTime, tvHourEightTemperture;
 
+    private ActivityWeatherBinding activityWeatherBinding;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);//使标题栏消失
-        setContentView(R.layout.activity_weather);
+        activityWeatherBinding = ActivityWeatherBinding.inflate(getLayoutInflater());
+        setContentView(activityWeatherBinding.getRoot());
         System.out.println("WeatherActivity");
         findView();//让所有组件与界面建立联系
         intent =getIntent();
@@ -350,6 +298,8 @@ public class WeatherActivity extends AppCompatActivity {
         System.out.println(" citymsg"+citymsg);
         float dpDimension = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16,this.getResources().getDisplayMetrics());
         System.out.println(dpDimension+"hh");
+
+
 //        float pxValue = getResources().getDimension(R.dimen.sp_15);//获取对应资源文件下的sp值
 //        int spValue = DisplayUtil. ;px2sp(this, pxValue);//将px值转换成sp值
 //        tvHourOneTime.setTextSize(spValue);//设置文字大小
@@ -497,8 +447,6 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
         thread.start();
-
-
     }
     public String getTomorray(String stringtoday){//获得明天的日期
         Calendar calendar = new GregorianCalendar();//获得一个日期表
@@ -527,49 +475,6 @@ public class WeatherActivity extends AppCompatActivity {
         tvDayToday_WeatherChange = findViewById(R.id.tvDayToday_WeatherChange);
         tvDayToday_AirQualityNum = findViewById(R.id.tvDayToday_AirQualityNum);
         tvDayToday_AirQualityGrade = findViewById(R.id.tvDayToday_AirQualityGrade);
-
-        tvDayAfterOneDay = findViewById(R.id.tvDayAfterOneDay);
-        tvDayAfterOneDay_Week = findViewById(R.id.tvDayAfterOneDay_Week);
-        ivDayAfterOneDay_ImageView = findViewById(R.id.ivDayAfterOneDay_ImageView);
-        tvDayAfterOneDay_MaxTemperture = findViewById(R.id.tvDayAfterOneDay_MaxTemperture);
-        tvDayAfterOneDay_MinTemperture = findViewById(R.id.tvDayAfterOneDay_MinTemperture);
-
-        tvDayAfterTwoDay = findViewById(R.id.tvDayAfterTwoDay);
-        tvDayAfterTwoDay_Week = findViewById(R.id.tvDayAfterTwoDay_Week);
-        ivDayAfterTwoDay_ImageView = findViewById(R.id.ivDayAfterTwoDay_ImageView);
-        tvDayAfterTwoDay_MaxTemperture = findViewById(R.id.tvDayAfterTwoDay_MaxTemperture);
-        tvDayAfterTwoDay_MinTemperture = findViewById(R.id.tvDayAfterTwoDay_MinTemperture);
-
-
-        tvDayAfterThreeDay = findViewById(R.id.tvDayAfterThreeDay);
-        tvDayAfterThreeDay_Week = findViewById(R.id.tvDayAfterThreeDay_Week);
-        ivDayAfterThreeDay_ImageView = findViewById(R.id.ivDayAfterThreeDay_ImageView);
-        tvDayAfterThreeDay_MaxTemperture = findViewById(R.id.tvDayAfterThreeDay_MaxTemperture);
-        tvDayAfterThreeDay_MinTemperture = findViewById(R.id.tvDayAfterThreeDay_MinTemperture);
-
-        tvDayAfterFourDay = findViewById(R.id.tvDayAfterFourDay);
-        tvDayAfterFourDay_Week = findViewById(R.id.tvDayAfterFourDay_Week);
-        ivDayAfterFourDay_ImageView = findViewById(R.id.ivDayAfterFourDay_ImageView);
-        tvDayAfterFourDay_MaxTemperture = findViewById(R.id.tvDayAfterFourDay_MaxTemperture);
-        tvDayAfterFourDay_MinTemperture = findViewById(R.id.tvDayAfterFourDay_MinTemperture);
-
-        tvDayAfterFiveDay = findViewById(R.id.tvDayAfterFiveDay);
-        tvDayAfterFiveDay_Week = findViewById(R.id.tvDayAfterFiveDay_Week);
-        ivDayAfterFiveDay_ImageView = findViewById(R.id.ivDayAfterFiveDay_ImageView);
-        tvDayAfterFiveDay_MaxTemperture = findViewById(R.id.tvDayAfterFiveDay_MaxTemperture);
-        tvDayAfterFiveDay_MinTemperture = findViewById(R.id.tvDayAfterFiveDay_MinTemperture);
-
-        tvDayAfterSixDay = findViewById(R.id.tvDayAfterSixDay);
-        tvDayAfterSixDay_Week = findViewById(R.id.tvDayAfterSixDay_Week);
-        ivDayAfterSixDay_ImageView = findViewById(R.id.ivDayAfterSixDay_ImageView);
-        tvDayAfterSixDay_MaxTemperture = findViewById(R.id.tvDayAfterSixDay_MaxTemperture);
-        tvDayAfterSixDay_MinTemperture = findViewById(R.id.tvDayAfterSixDay_MinTemperture);
-
-        tvDayAfterSevenDay = findViewById(R.id.tvDayAfterSevenDay);
-        tvDayAfterSevenDay_Week = findViewById(R.id.tvDayAfterSevenDay_Week);
-        ivDayAfterSevenDay_ImageView = findViewById(R.id.ivDayAfterSevenDay_ImageView);
-        tvDayAfterSevenDay_MaxTemperture = findViewById(R.id.tvDayAfterSevenDay_MaxTemperture);
-        tvDayAfterSevenDay_MinTemperture = findViewById(R.id.tvDayAfterSevenDay_MinTemperture);
 
         tvHourOneTime = findViewById(R.id.tvHourOneTime);
         tvHourOneTemperture = findViewById(R.id.tvHourOneTemperture);
@@ -602,6 +507,55 @@ public class WeatherActivity extends AppCompatActivity {
         tvHourEightTime = findViewById(R.id.tvHourEightTime);
         tvHourEightTemperture = findViewById(R.id.tvHourEightTemperture);
         ivHourEightImage = findViewById(R.id.ivHourEightImage);
+    }
+
+    public int displayiv(String weathercondition){//显示天气图标
+        System.out.println("displayiv "+weathercondition);
+        int resId = R.drawable.qing;
+        switch (weathercondition){
+            case "阴":
+                resId = R.drawable.ying;
+                break;
+            case "晴":
+                resId = R.drawable.qing;
+                break;
+            case "多云":
+                resId = R.drawable.duoyun;
+                break;
+            case "小雨":
+                resId = R.drawable.xiaoyu;
+                break;
+            case "中雨":
+                resId = R.drawable.zhongyu;
+                break;
+            case "大雨":
+                resId = R.drawable.dayu;
+                break;
+            case "暴雨":
+                resId = R.drawable.baoyu;
+                break;
+            case "大暴雨":
+                resId = R.drawable.dabaoyu;
+                break;
+            case "特大暴雨":
+                resId = R.drawable.tedabaoyu;
+                break;
+            case "小雪":
+                resId = R.drawable.xiaoyue;
+                break;
+            case "中雪":
+                resId = R.drawable.zhongyue;
+                break;
+            case "大雪":
+                resId = R.drawable.dayue;
+                break;
+            case "暴雪":
+                resId = R.drawable.dabaoyue;
+                break;
+            default:
+        }
+
+        return resId;
     }
     /*
      *替换imageView图标
@@ -652,6 +606,7 @@ public class WeatherActivity extends AppCompatActivity {
                 view.setImageResource(R.drawable.qing);
         }
     }
+
     public static String addSpace(String temp){//给之后每天的最高温和最低温添加空格,使图标对齐
         String tempAddSpace = temp;
             switch (tempAddSpace.length()){//长度为4则不添加空格

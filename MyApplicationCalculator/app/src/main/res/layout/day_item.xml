@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.example.myapplicationcalculator.LateDateWeatherBean" alias = "dayBean"/>
+        <variable
+            name="day"
+            type="dayBean" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <TextView
+            android:id="@+id/tvDayAfterOneDay"
+            android:text="@{day.dayTime}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/colorBackGround"
+            android:textSize="20dp"
+            android:textStyle="normal|bold" />
+
+        <TextView
+            android:id="@+id/tvDayAfterOneDay_Week"
+            android:text="@{day.dayWeek}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/colorBackGround"
+            android:textSize="20dp"
+            android:textStyle="normal|bold" />
+
+        <ImageView
+            android:id="@+id/ivDayAfterOneDay_ImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/qing" />
+
+        <TextView
+            android:id="@+id/tvDayAfterOneDay_MaxTemperture"
+            android:text="@{day.tempHeight}"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/colorBackGround"
+            android:textSize="20dp"
+            android:textStyle="normal|bold" />
+
+        <TextView
+            android:id="@+id/tvDayAfterOneDay_MinTemperture"
+            android:text="@{day.tempLow}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/colorBackGround"
+            android:textSize="20dp"
+            android:textStyle="normal|bold" />
+    </LinearLayout>
+</layout>
