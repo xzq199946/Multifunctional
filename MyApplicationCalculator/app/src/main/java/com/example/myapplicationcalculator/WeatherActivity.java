@@ -1,15 +1,7 @@
 package com.example.myapplicationcalculator;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.database.Observable;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -20,12 +12,16 @@ import android.provider.Settings;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
-import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.myapplicationcalculator.databinding.ActivityWeatherBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -48,6 +44,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.acl.Owner;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,12 +55,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import interfaces.heweather.com.interfacesmodule.view.HeConfig;
-import okhttp3.HttpUrl;
-
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 
 public class WeatherActivity extends AppCompatActivity {
@@ -87,6 +78,9 @@ public class WeatherActivity extends AppCompatActivity {
             "fivehourcondition","sixhourcondition","sevenhourcondition","eighthourcondition"};
 
     private DayAdapter dayAdapter;
+
+    DaysViewModel daysViewModel;
+
     @SuppressLint("HandlerLeak")
     private final Handler mHandler = new Handler(){
         @SuppressLint("HandlerLeak")
@@ -126,19 +120,14 @@ public class WeatherActivity extends AppCompatActivity {
                     lateDateWeatherBean.setTempHeight(tempHeight);
                     lateDateWeatherBean.setTempLow(tempLow);
                     lateDateWeatherBean.setConditionImageResource(resInt);
+
                     lateDaysList.add(lateDateWeatherBean);
 
                     System.out.println("nowapi"+jsonObject1.get("days").getAsString().substring(5));
                     dayindex++;
                 }
 
-                if(jsonObject_weatherNowApi != null){
-                    if (lateDaysList.size() > 0) {
-                        dayAdapter = new DayAdapter(lateDaysList);
-                        activityWeatherBinding.dayRecycle.setLayoutManager(new LinearLayoutManager(WeatherActivity.this));
-                        activityWeatherBinding.dayRecycle.setAdapter(dayAdapter);
-                    }
-                }
+                daysViewModel.setDays(lateDaysList);
             }
             if(val.equals("today"))
             {
@@ -293,6 +282,14 @@ public class WeatherActivity extends AppCompatActivity {
         setContentView(activityWeatherBinding.getRoot());
         System.out.println("WeatherActivity");
         findView();//让所有组件与界面建立联系
+        daysViewModel = new ViewModelProvider(this).get(DaysViewModel.class);
+        daysViewModel.getDaysLiveData().observe(WeatherActivity.this, (Observer<List<LateDateWeatherBean>>) lateDateWeatherBeans -> {
+            if (lateDateWeatherBeans.size() > 0) {
+                dayAdapter = new DayAdapter(lateDateWeatherBeans);
+                activityWeatherBinding.dayRecycle.setLayoutManager(new LinearLayoutManager(WeatherActivity.this));
+                activityWeatherBinding.dayRecycle.setAdapter(dayAdapter);
+            }
+        });
         intent =getIntent();
         String citymsg= intent.getStringExtra("data");//获得从搜索城市界面中输入的城市
         System.out.println(" citymsg"+citymsg);
@@ -440,6 +437,7 @@ public class WeatherActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
          thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -447,6 +445,7 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
         thread.start();
+
     }
     public String getTomorray(String stringtoday){//获得明天的日期
         Calendar calendar = new GregorianCalendar();//获得一个日期表
@@ -898,4 +897,6 @@ public class WeatherActivity extends AppCompatActivity {
             new Thread(networkTask).start();
         }
     }
+
+
 }

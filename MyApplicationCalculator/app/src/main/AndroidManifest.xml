@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dist="http://schemas.android.com/apk/distribution"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.myapplicationcalculator">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -23,14 +24,17 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:theme="@style/AppTheme">
-        <activity android:name=".SearchCityActivity" android:launchMode="singleTop"></activity>
+        android:theme="@style/AppTheme"
+        tools:targetApi="n">
+        <activity
+            android:name=".SearchCityActivity"
+            android:launchMode="singleTop" />
         <activity android:name=".WeatherActivity" android:launchMode="singleTop"/>
         <activity android:name=".MainMenuActivity" android:launchMode="singleTop"/>
         <activity android:name=".RegesiteActivity" android:launchMode="singleTop"/>
         <activity android:name=".CalculateActivity" android:launchMode="singleTop"/>
         <activity android:name=".PictureActivity" android:launchMode="singleTop"/>
-        <activity android:name=".MainActivity" android:launchMode="singleTop">
+        <activity android:name=".MainActivity" android:launchMode="singleTop" android:exported="true">
         <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
